@@ -7,4 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!--Tema-->
+    <color name="colorPrimary">#37474F</color>
+    <color name="colorPrimaryDark">#263238</color>
+    <color name="colorAccent">#546E7A</color>
+    <color name="colorAccent2">#7598A8</color>
+
+    <!--Botao-->
+    <color name="btnLogin">#1fbad6</color>
+    <color name="btnCadastro">#83838c</color>
+
 </resources>

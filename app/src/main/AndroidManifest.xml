@@ -13,7 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Uber"
         tools:targetApi="31">
-
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -30,9 +29,9 @@
             android:value="YOUR_API_KEY" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
