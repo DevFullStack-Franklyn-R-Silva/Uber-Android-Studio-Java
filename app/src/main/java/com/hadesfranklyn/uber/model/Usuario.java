@@ -1,5 +1,9 @@
 package com.hadesfranklyn.uber.model;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
+import com.hadesfranklyn.uber.config.ConfiguracaoFirebase;
+
 public class Usuario {
 
     private String id;
@@ -8,9 +12,11 @@ public class Usuario {
     private String senha;
     private String tipo;
 
+    //construtor
     public Usuario() {
     }
 
+    //get e set
     public String getId() {
         return id;
     }
@@ -35,6 +41,7 @@ public class Usuario {
         this.email = email;
     }
 
+    @Exclude
     public String getSenha() {
         return senha;
     }
@@ -49,5 +56,14 @@ public class Usuario {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    //métodos
+    public void salvar(){
+
+        DatabaseReference firebaseReference = ConfiguracaoFirebase.getFirebaseDatabase();
+        DatabaseReference usuarios = firebaseReference.child("usuarios").child(getId());
+
+        usuarios.setValue(this);
     }
 }

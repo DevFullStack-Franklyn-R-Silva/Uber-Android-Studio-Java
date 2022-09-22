@@ -14,17 +14,20 @@
         android:theme="@style/Theme.Uber"
         tools:targetApi="31">
         <activity
+            android:name=".activity.MapsActivity" />
+        <activity
+            android:name=".activity.RequisicoesActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.CadastroActivity"
             android:exported="false"
             android:label="@string/titulo_cadastro"
-            android:parentActivityName=".activity.MainActivity"
-            />
+            android:parentActivityName=".activity.MainActivity" />
         <activity
             android:name=".activity.LoginActivity"
             android:exported="false"
             android:label="@string/titulo_login"
-            android:parentActivityName=".activity.MainActivity"
-            />
+            android:parentActivityName=".activity.MainActivity" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
