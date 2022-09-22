@@ -15,7 +15,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.hadesfranklyn.uber.activity.MapsActivity;
+import com.hadesfranklyn.uber.activity.PassageiroActivity;
 import com.hadesfranklyn.uber.activity.RequisicoesActivity;
 import com.hadesfranklyn.uber.config.ConfiguracaoFirebase;
 import com.hadesfranklyn.uber.model.Usuario;
@@ -69,7 +69,7 @@ public class UsuarioFirebase {
                         Intent i = new Intent(activity, RequisicoesActivity.class);
                         activity.startActivity(i);
                     } else {
-                        Intent i = new Intent(activity, MapsActivity.class);
+                        Intent i = new Intent(activity, PassageiroActivity.class);
                         activity.startActivity(i);
                     }
                 }
