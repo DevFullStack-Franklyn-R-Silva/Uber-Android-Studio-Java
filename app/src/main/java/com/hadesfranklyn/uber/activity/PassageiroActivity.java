@@ -1,5 +1,11 @@
 package com.hadesfranklyn.uber.activity;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -7,11 +13,13 @@ import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,6 +32,8 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
     private GoogleMap mMap;
     private FirebaseAuth autenticacao;
     private ActivityPassageiroBinding binding;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +76,47 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        //Recuperar localizacao do usuario
+        recuperarLocalizacaoUsuario();
+
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(45, 39);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        LatLng sydney = new LatLng(-9.75164, -36.6604);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Brasil"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    private void recuperarLocalizacaoUsuario() {
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+
+                // Recuperar latitude e longitude
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+
+                LatLng meuLocal = new LatLng(latitude, longitude);
+
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions()
+                        .position(meuLocal)
+                        .title("Meu Local")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.usuario)));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(meuLocal, 20));
+            }
+        };
+
+        //Solicitar atualizacoes de localizacao
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    10000,
+                    10,
+                    locationListener
+            );
+        }
+
     }
 
 }
