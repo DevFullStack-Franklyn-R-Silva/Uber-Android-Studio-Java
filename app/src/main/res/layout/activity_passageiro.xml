@@ -23,6 +23,7 @@
     <include layout="@layout/content_passageiro" />
 
     <LinearLayout
+        android:id="@+id/linearLayoutDestino"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -30,9 +31,8 @@
         android:layout_marginRight="16dp"
         android:background="@android:color/white"
         android:orientation="vertical"
-        android:padding="8dp"
 
-        >
+        android:padding="8dp">
 
         <EditText
             android:id="@+id/editLocal"
@@ -55,8 +55,8 @@
             android:layout_height="40dp"
             android:background="@android:color/white"
             android:drawableLeft="@drawable/circulo_verde"
-            android:drawableTint="@android:color/darker_gray"
             android:drawablePadding="6dp"
+            android:drawableTint="@android:color/darker_gray"
             android:ems="10"
             android:hint="Digite seu destino"
             android:inputType="textPersonName"
