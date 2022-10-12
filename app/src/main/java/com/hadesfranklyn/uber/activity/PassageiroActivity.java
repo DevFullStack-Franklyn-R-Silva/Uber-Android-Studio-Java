@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,7 +46,6 @@ import com.hadesfranklyn.uber.model.Usuario;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -75,8 +73,7 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
         binding = ActivityPassageiroBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        //Configuracoes iniciais
-        firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
+
 
         inicializarComponentes();
 
@@ -97,18 +94,20 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
 
                 List<Requisicao> lista = new ArrayList<>();
 
-                for(DataSnapshot ds : dataSnapshot.getChildren()){
-                    lista.add(ds.getValue(Requisicao.class));;
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    lista.add(ds.getValue(Requisicao.class));
                 }
                 Collections.reverse(lista);
-                requisicao = lista.get(0);
+                if (lista != null && lista.size() > 0) {
+                    requisicao = lista.get(0);
 
-                switch (requisicao.getStatus()) {
-                    case Requisicao.STATUS_AGUARDANDO:
-                        linearLayoutDestino.setVisibility(View.GONE);
-                        buttonChamarUber.setText("Cancelar Uber");
-                        uberChamado = true;
-                        break;
+                    switch (requisicao.getStatus()) {
+                        case Requisicao.STATUS_AGUARDANDO:
+                            linearLayoutDestino.setVisibility(View.GONE);
+                            buttonChamarUber.setText("Cancelar Uber");
+                            uberChamado = true;
+                            break;
+                    }
                 }
             }
 
@@ -284,6 +283,7 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
 
         //Configuracoes iniciais
         autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
