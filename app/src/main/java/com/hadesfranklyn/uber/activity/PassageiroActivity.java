@@ -46,6 +46,9 @@ import com.hadesfranklyn.uber.model.Requisicao;
 import com.hadesfranklyn.uber.model.Usuario;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -91,13 +94,21 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
         requisicaoPesquisa.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                List<Requisicao> lista = new ArrayList<>();
+
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
-                    requisicao = ds.getValue(Requisicao.class);
+                    lista.add(ds.getValue(Requisicao.class));;
+                }
+                Collections.reverse(lista);
+                requisicao = lista.get(0);
 
-                    switch (){
-
-                    }
-                    break;
+                switch (requisicao.getStatus()) {
+                    case Requisicao.STATUS_AGUARDANDO:
+                        linearLayoutDestino.setVisibility(View.GONE);
+                        buttonChamarUber.setText("Cancelar Uber");
+                        uberChamado = true;
+                        break;
                 }
             }
 
