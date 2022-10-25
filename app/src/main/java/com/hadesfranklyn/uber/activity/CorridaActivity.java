@@ -183,7 +183,17 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
+                if (key.equals(passageiro.getId())) {
+                    //  Log.d("onKeyEntered", "onKeyEntered: passageiro está dentro da área!");
 
+                    //Alterar status da requsicao
+                    requisicao.setStatus(Requisicao.STATUS_VIAGEM);
+                    requisicao.atualizarStatus();
+
+                    //Remove listener
+                    geoQuery.removeAllListeners();
+                    circulo.remove();
+                }
             }
 
             @Override
