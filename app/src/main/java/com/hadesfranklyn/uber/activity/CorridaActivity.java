@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.hadesfranklyn.uber.R;
 import com.hadesfranklyn.uber.config.ConfiguracaoFirebase;
 import com.hadesfranklyn.uber.databinding.ActivityCorridaBinding;
+import com.hadesfranklyn.uber.helper.UsuarioFirebase;
 import com.hadesfranklyn.uber.model.Requisicao;
 import com.hadesfranklyn.uber.model.Usuario;
 
@@ -127,6 +128,14 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void requisicaoAguardando() {
         buttonAceitarCorrida.setText("Aceitar corrida");
+
+        //Exibe marcador do motorista
+        adicionaMarcadorMotorista(localMotorista, motorista.getNome());
+
+        mMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(localMotorista, 20)
+        );
+
     }
 
     private void requisicaoACaminho() {
@@ -222,6 +231,9 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
                 localMotorista = new LatLng(latitude, longitude);
+
+                //Atualizar GeoFire
+                UsuarioFirebase.atualizarDadosLocalizacao(latitude, longitude);
 
                 alteraInterfaceStatusRequisicao(statusRequisicao);
             }

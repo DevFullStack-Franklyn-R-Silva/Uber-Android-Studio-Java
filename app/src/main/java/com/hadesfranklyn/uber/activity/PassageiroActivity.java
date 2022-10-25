@@ -52,6 +52,16 @@ import java.util.Locale;
 
 public class PassageiroActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    /*
+     *
+     * Lat/ Log destino: -9.720593597424193, -36.66472754478114
+     * Lat/ Log passageiro: -9.72080509340178, -36.66137462573433
+     * Lat/ Log motorista (a caminho):
+     *      Inicial: -9.728418858120367, -36.65884262062992
+     *      Intermediaria: -9.72588095581388, -36.65875678994841
+     *      final: -9.721978893433207, -36.66164836894532
+     * */
+
     //Componentes
     private EditText editDestino;
     private LinearLayout linearLayoutDestino;
@@ -249,6 +259,9 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
                 double longitude = location.getLongitude();
 
                 localPassageiro = new LatLng(latitude, longitude);
+
+                //Atualizar GeoFire
+                UsuarioFirebase.atualizarDadosLocalizacao(latitude, longitude);
 
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions()
