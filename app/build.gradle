@@ -51,6 +51,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-auth'
 
-    //Dependencia geofire
+    //Dependencia geofire https://github.com/firebase/geofire-java
     implementation 'com.firebase:geofire-android:2.3.1'
 }
