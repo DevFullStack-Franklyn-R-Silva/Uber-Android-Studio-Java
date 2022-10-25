@@ -70,9 +70,9 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = ActivityPassageiroBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
 
 
         inicializarComponentes();
