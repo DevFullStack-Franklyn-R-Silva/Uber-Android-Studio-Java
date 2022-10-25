@@ -22,8 +22,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.hadesfranklyn.uber.R;
+import com.hadesfranklyn.uber.config.ConfiguracaoFirebase;
 import com.hadesfranklyn.uber.databinding.ActivityCorridaBinding;
 import com.hadesfranklyn.uber.model.Requisicao;
 import com.hadesfranklyn.uber.model.Usuario;
@@ -55,7 +59,51 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
         inicializarComponentes();
 
+        //Recupera dados do usuário
+        if (getIntent().getExtras().containsKey("idRequisicao")
+                && getIntent().getExtras().containsKey("motorista")) {
+            Bundle extras = getIntent().getExtras();
+            motorista = (Usuario) extras.getSerializable("motorista");
+            idRequisicao = extras.getString("idRequisicao");
 
+            verificaStatusRequisicao();
+        }
+    }
+
+    private void verificaStatusRequisicao() {
+
+        DatabaseReference requisicoes = firebaseRef.child("requisicoes")
+                .child(idRequisicao);
+        requisicoes.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                //Recupera requisição
+                requisicao = dataSnapshot.getValue(Requisicao.class);
+
+                switch (requisicao.getStatus()) {
+                    case Requisicao.STATUS_AGUARDANDO:
+                        requisicaoAguardando();
+                        break;
+                    case Requisicao.STATUS_A_CAMINHO:
+                        requisicaoACaminho();
+                        break;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void requisicaoAguardando() {
+        buttonAceitarCorrida.setText("Aceitar corrida");
+    }
+
+    private void requisicaoACaminho() {
+        buttonAceitarCorrida.setText("A caminho do passageiro");
     }
 
     public void aceitarCorrida(View view) {
@@ -66,6 +114,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         requisicao.setMotorista(motorista);
         requisicao.setStatus(Requisicao.STATUS_A_CAMINHO);
 
+        requisicao.atualizar();
     }
 
 
@@ -123,8 +172,8 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    10000,
-                    10,
+                    0,
+                    0,
                     locationListener
             );
         }
@@ -137,6 +186,11 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Iniciar corrida");
+
+        buttonAceitarCorrida = findViewById(R.id.buttonAceitarCorrida);
+
+        //Configurações iniciais
+        firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
