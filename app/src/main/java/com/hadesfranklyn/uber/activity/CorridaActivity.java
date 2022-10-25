@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.navigation.ui.AppBarConfiguration;
 
@@ -33,6 +35,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,6 +44,7 @@ import com.hadesfranklyn.uber.R;
 import com.hadesfranklyn.uber.config.ConfiguracaoFirebase;
 import com.hadesfranklyn.uber.databinding.ActivityCorridaBinding;
 import com.hadesfranklyn.uber.helper.UsuarioFirebase;
+import com.hadesfranklyn.uber.model.Destino;
 import com.hadesfranklyn.uber.model.Requisicao;
 import com.hadesfranklyn.uber.model.Usuario;
 
@@ -48,6 +52,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
     //componente
     private Button buttonAceitarCorrida;
+    private FloatingActionButton fabRota;
 
     private GoogleMap mMap;
     private LocationManager locationManager;
@@ -61,25 +66,21 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
     private DatabaseReference firebaseRef;
     private Marker marcadorMotorista;
     private Marker marcadorPassageiro;
+    private Marker marcadorDestino;
     private String statusRequisicao;
     private boolean requisicaoAtiva;
-
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityCorridaBinding binding;
+    private Destino destino;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        binding = ActivityCorridaBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
+        setContentView(R.layout.activity_corrida);
 
         inicializarComponentes();
 
         //Recupera dados do usuário
-        if (getIntent().getExtras().containsKey("idRequisicao")
-                && getIntent().getExtras().containsKey("motorista")) {
+        if( getIntent().getExtras().containsKey("idRequisicao")
+                && getIntent().getExtras().containsKey("motorista") ){
             Bundle extras = getIntent().getExtras();
             motorista = (Usuario) extras.getSerializable("motorista");
             localMotorista = new LatLng(
@@ -88,31 +89,33 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
             );
             idRequisicao = extras.getString("idRequisicao");
             requisicaoAtiva = extras.getBoolean("requisicaoAtiva");
-
             verificaStatusRequisicao();
         }
+
     }
 
-    private void verificaStatusRequisicao() {
+    private void verificaStatusRequisicao(){
 
         DatabaseReference requisicoes = firebaseRef.child("requisicoes")
-                .child(idRequisicao);
+                .child( idRequisicao );
         requisicoes.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 //Recupera requisição
                 requisicao = dataSnapshot.getValue(Requisicao.class);
-                if (requisicao != null) {
+                if(requisicao != null){
                     passageiro = requisicao.getPassageiro();
                     localPassageiro = new LatLng(
                             Double.parseDouble(passageiro.getLatitude()),
                             Double.parseDouble(passageiro.getLongitude())
                     );
-
                     statusRequisicao = requisicao.getStatus();
+                    destino = requisicao.getDestino();
                     alteraInterfaceStatusRequisicao(statusRequisicao);
                 }
+
+
             }
 
             @Override
@@ -120,80 +123,150 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
             }
         });
+
+
     }
 
-    private void alteraInterfaceStatusRequisicao(String status) {
-        switch (status) {
-            case Requisicao.STATUS_AGUARDANDO:
+    private void alteraInterfaceStatusRequisicao(String status){
+
+        switch ( status ){
+            case Requisicao.STATUS_AGUARDANDO :
                 requisicaoAguardando();
                 break;
-            case Requisicao.STATUS_A_CAMINHO:
+            case Requisicao.STATUS_A_CAMINHO :
                 requisicaoACaminho();
                 break;
+            case Requisicao.STATUS_VIAGEM :
+                requisicaoViagem();
+                break;
+            case Requisicao.STATUS_FINALIZADA :
+                requisicaoFinalizada();
+                break;
         }
+
     }
 
-    private void requisicaoAguardando() {
+    private void requisicaoFinalizada(){
+
+        fabRota.setVisibility(View.GONE);
+
+        if( marcadorMotorista != null )
+            marcadorMotorista.remove();
+
+        if( marcadorDestino != null )
+            marcadorDestino.remove();
+
+        //Exibe marcador de destino
+        LatLng localDestino = new LatLng(
+                Double.parseDouble(destino.getLatitude()),
+                Double.parseDouble(destino.getLongitude())
+        );
+        adicionaMarcadorDestino(localDestino, "Destino");
+        centralizarMarcador(localDestino);
+
+
+
+        buttonAceitarCorrida.setText("Corrida finalizada - R$ 20");
+
+    }
+
+    private void centralizarMarcador(LatLng local){
+        mMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(local, 20)
+        );
+    }
+
+    private void requisicaoAguardando(){
+
         buttonAceitarCorrida.setText("Aceitar corrida");
 
         //Exibe marcador do motorista
-        adicionaMarcadorMotorista(localMotorista, motorista.getNome());
-
-        mMap.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(localMotorista, 20)
-        );
+        adicionaMarcadorMotorista(localMotorista, motorista.getNome() );
+        centralizarMarcador(localMotorista);
 
     }
 
-    private void requisicaoACaminho() {
+    private void requisicaoACaminho(){
+
         buttonAceitarCorrida.setText("A caminho do passageiro");
+        fabRota.setVisibility(View.VISIBLE);
+
+        //Exibe marcador do motorista
+        adicionaMarcadorMotorista(localMotorista, motorista.getNome() );
+
+        //Exibe marcador passageiro
+        adicionaMarcadorPassageiro(localPassageiro, passageiro.getNome());
+
+        //Centralizar dois marcadores
+        centralizarDoisMarcadores(marcadorMotorista, marcadorPassageiro);
+
+        //Inicia monitoramento do motorista / passageiro
+        iniciarMonitoramento(motorista, localPassageiro, Requisicao.STATUS_VIAGEM );
+
+    }
+
+
+    private void requisicaoViagem(){
+
+        //Altera interface
+        fabRota.setVisibility(View.VISIBLE);
+        buttonAceitarCorrida.setText("A caminho do destino");
 
         //Exibe marcador do motorista
         adicionaMarcadorMotorista(localMotorista, motorista.getNome());
 
-        //Exibe marcador do passageiro
-        adicionaMarcadorPassageiro(localPassageiro, passageiro.getNome());
+        //Exibe marcador de destino
+        LatLng localDestino = new LatLng(
+                Double.parseDouble(destino.getLatitude()),
+                Double.parseDouble(destino.getLongitude())
+        );
+        adicionaMarcadorDestino(localDestino, "Destino");
 
-        //Centralizar Dois Marcadores
-        centralizarDoisMarcadores(marcadorMotorista, marcadorPassageiro);
+        //Centraliza marcadores motorista / destino
+        centralizarDoisMarcadores(marcadorMotorista, marcadorDestino);
 
-        // Iniciar monitoramento do motorista / passageiro
-        iniciarMonitoramentoCorrida(passageiro, motorista);
+        //Inicia monitoramento do motorista / passageiro
+        iniciarMonitoramento(motorista, localDestino, Requisicao.STATUS_FINALIZADA );
+
     }
 
-    private void iniciarMonitoramentoCorrida(Usuario p, Usuario m) {
+    private void iniciarMonitoramento(final Usuario uOrigem, LatLng localDestino, final String status){
 
-        //Inicializar geofire
-        DatabaseReference localUsuario = ConfiguracaoFirebase.getFirebaseDatabase().child("local_usuario");
+        //Inicializar GeoFire
+        DatabaseReference localUsuario = ConfiguracaoFirebase.getFirebaseDatabase()
+                .child("local_usuario");
         GeoFire geoFire = new GeoFire(localUsuario);
 
-        //Adiciona circulo no passageiro
-        Circle circulo = mMap.addCircle(
+        //Adiciona círculo no passageiro
+        final Circle circulo = mMap.addCircle(
                 new CircleOptions()
-                        .center(localPassageiro)
+                        .center( localDestino )
                         .radius(50)//em metros
-                        .fillColor(Color.argb(90, 255, 153, 0))
-                        .strokeColor(Color.argb(190, 255, 152, 0))
+                        .fillColor(Color.argb(90,255, 153,0))
+                        .strokeColor(Color.argb(190,255,152,0))
         );
 
-        GeoQuery geoQuery = geoFire.queryAtLocation(
-                new GeoLocation(localPassageiro.latitude, localPassageiro.longitude),
+        final GeoQuery geoQuery = geoFire.queryAtLocation(
+                new GeoLocation(localDestino.latitude, localDestino.longitude),
                 0.05//em km (0.05 50 metros)
         );
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                if (key.equals(passageiro.getId())) {
-                    //  Log.d("onKeyEntered", "onKeyEntered: passageiro está dentro da área!");
 
-                    //Alterar status da requsicao
-                    requisicao.setStatus(Requisicao.STATUS_VIAGEM);
+                if( key.equals(uOrigem.getId()) ){
+                    //Log.d("onKeyEntered", "onKeyEntered: motorista está dentro da área!");
+
+                    //Altera status da requisicao
+                    requisicao.setStatus(status);
                     requisicao.atualizarStatus();
 
                     //Remove listener
                     geoQuery.removeAllListeners();
                     circulo.remove();
+
                 }
+
             }
 
             @Override
@@ -219,12 +292,12 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
     }
 
-    private void centralizarDoisMarcadores(Marker marcador1, Marker marcador2) {
+    private void centralizarDoisMarcadores(Marker marcador1, Marker marcador2){
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
-        builder.include(marcador1.getPosition());
-        builder.include(marcador2.getPosition());
+        builder.include( marcador1.getPosition() );
+        builder.include( marcador2.getPosition() );
 
         LatLngBounds bounds = builder.build();
 
@@ -233,15 +306,15 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         int espacoInterno = (int) (largura * 0.20);
 
         mMap.moveCamera(
-                CameraUpdateFactory.newLatLngBounds(bounds, largura, altura, espacoInterno)
+                CameraUpdateFactory.newLatLngBounds(bounds,largura,altura,espacoInterno)
         );
+
     }
 
-    private void adicionaMarcadorMotorista(LatLng localizacao, String titulo) {
+    private void adicionaMarcadorMotorista(LatLng localizacao, String titulo){
 
-        if (marcadorMotorista != null) {
+        if( marcadorMotorista != null )
             marcadorMotorista.remove();
-        }
 
         marcadorMotorista = mMap.addMarker(
                 new MarkerOptions()
@@ -252,11 +325,10 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
     }
 
-    private void adicionaMarcadorPassageiro(LatLng localizacao, String titulo) {
+    private void adicionaMarcadorPassageiro(LatLng localizacao, String titulo){
 
-        if (marcadorPassageiro != null) {
+        if( marcadorPassageiro != null )
             marcadorPassageiro.remove();
-        }
 
         marcadorPassageiro = mMap.addMarker(
                 new MarkerOptions()
@@ -267,24 +339,39 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
     }
 
-    public void aceitarCorrida(View view) {
+    private void adicionaMarcadorDestino(LatLng localizacao, String titulo){
 
-        //Configura requisicao
-        requisicao = new Requisicao();
-        requisicao.setId(idRequisicao);
-        requisicao.setMotorista(motorista);
-        requisicao.setStatus(Requisicao.STATUS_A_CAMINHO);
+        if( marcadorPassageiro != null )
+            marcadorPassageiro.remove();
 
-        requisicao.atualizar();
+        if( marcadorDestino != null )
+            marcadorDestino.remove();
+
+        marcadorDestino = mMap.addMarker(
+                new MarkerOptions()
+                        .position(localizacao)
+                        .title(titulo)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.destino))
+        );
+
     }
 
-
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
         //Recuperar localizacao do usuário
         recuperarLocalizacaoUsuario();
+
     }
 
     private void recuperarLocalizacaoUsuario() {
@@ -304,6 +391,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
                 UsuarioFirebase.atualizarDadosLocalizacao(latitude, longitude);
 
                 alteraInterfaceStatusRequisicao(statusRequisicao);
+
             }
 
             @Override
@@ -323,7 +411,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         };
 
         //Solicitar atualizações de localização
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
             locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
                     10000,
@@ -335,8 +423,22 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
     }
 
-    private void inicializarComponentes() {
-        setSupportActionBar(binding.toolbar);
+    public void aceitarCorrida(View view){
+
+        //Configura requisicao
+        requisicao = new Requisicao();
+        requisicao.setId( idRequisicao );
+        requisicao.setMotorista( motorista );
+        requisicao.setStatus( Requisicao.STATUS_A_CAMINHO );
+
+        requisicao.atualizar();
+
+    }
+
+    private void inicializarComponentes(){
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Iniciar corrida");
@@ -350,14 +452,52 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //Adiciona evento de clique no FabRota
+        fabRota = findViewById(R.id.fabRota);
+        fabRota.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String status = statusRequisicao;
+                if( status != null && !status.isEmpty() ){
+
+                    String lat = "";
+                    String lon = "";
+
+                    switch ( status ){
+                        case Requisicao.STATUS_A_CAMINHO :
+                            lat = String.valueOf(localPassageiro.latitude);
+                            lon = String.valueOf(localPassageiro.longitude);
+                            break;
+                        case Requisicao.STATUS_VIAGEM :
+                            lat = destino.getLatitude();
+                            lon = destino.getLongitude();
+                            break;
+                    }
+
+                    //Abrir rota
+                    String latLong = lat + "," + lon;
+                    Uri uri = Uri.parse("google.navigation:q="+latLong+"&mode=d");
+                    Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                    i.setPackage("com.google.android.apps.maps");
+                    startActivity(i);
+
+                }
+
+            }
+        });
+
+
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        if (requisicaoAtiva) {
+        if (requisicaoAtiva){
             Toast.makeText(CorridaActivity.this,
-                    "Necessário encerrar a requisição atual!", Toast.LENGTH_SHORT).show();
-        } else {
+                    "Necessário encerrar a requisição atual!",
+                    Toast.LENGTH_SHORT).show();
+        }else {
             Intent i = new Intent(CorridaActivity.this, RequisicoesActivity.class);
             startActivity(i);
         }

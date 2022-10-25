@@ -23,30 +23,35 @@ public class Requisicao {
     }
 
     //Method
-    public void salvar() {
+    public void salvar(){
+
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         DatabaseReference requisicoes = firebaseRef.child("requisicoes");
 
         String idRequisicao = requisicoes.push().getKey();
-        setId(idRequisicao);
+        setId( idRequisicao );
 
-        requisicoes.child(getId()).setValue(this);
+        requisicoes.child( getId() ).setValue(this);
+
     }
 
-    public void atualizar() {
+    public void atualizar(){
+
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         DatabaseReference requisicoes = firebaseRef.child("requisicoes");
 
         DatabaseReference requisicao = requisicoes.child(getId());
 
         Map objeto = new HashMap();
-        objeto.put("motorista", getMotorista());
+        objeto.put("motorista", getMotorista() );
         objeto.put("status", getStatus());
 
-        requisicao.updateChildren(objeto);
+        requisicao.updateChildren( objeto );
+
     }
 
     public void atualizarStatus(){
+
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
         DatabaseReference requisicoes = firebaseRef.child("requisicoes");
 
@@ -55,7 +60,8 @@ public class Requisicao {
         Map objeto = new HashMap();
         objeto.put("status", getStatus());
 
-        requisicao.updateChildren(objeto);
+        requisicao.updateChildren( objeto );
+
     }
 
     //get e set
