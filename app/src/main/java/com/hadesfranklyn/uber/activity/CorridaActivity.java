@@ -125,6 +125,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         //Centralizar Dois Marcadores
         centralizarDoisMarcadores(marcadorMotorista, marcadorPassageiro);
     }
+
     private void centralizarDoisMarcadores(Marker marcador1, Marker marcador2) {
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -133,6 +134,14 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
         builder.include(marcador2.getPosition());
 
         LatLngBounds bounds = builder.build();
+
+        int largura = getResources().getDisplayMetrics().widthPixels;
+        int altura = getResources().getDisplayMetrics().heightPixels;
+        int espacoInterno = (int) (largura * 0.20);
+
+        mMap.moveCamera(
+                CameraUpdateFactory.newLatLngBounds(bounds, largura, altura, espacoInterno)
+        );
     }
 
     private void adicionaMarcadorMotorista(LatLng localizacao, String titulo) {
@@ -162,9 +171,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
                         .title(titulo)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.usuario))
         );
-        mMap.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(localizacao, 20)
-        );
+
     }
 
     public void aceitarCorrida(View view) {
