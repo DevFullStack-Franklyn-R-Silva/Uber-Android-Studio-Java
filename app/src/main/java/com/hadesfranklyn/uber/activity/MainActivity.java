@@ -30,24 +30,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Esconde a toolbar
         getSupportActionBar().hide();
 
-        //validar permissoes
-        Permissoes.validarPermissoes(permissoes, this , 1);
+        //validar permissões
+        Permissoes.validarPermissoes(permissoes, this, 1);
 
-//        autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-//        autenticacao.signOut();
+        /*
+        autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        autenticacao.signOut();*/
 
     }
 
-
-    public void abrirTelaLogin(View view) {
-        startActivity(new Intent(this, LoginActivity.class));
+    public void abrirTelaLogin(View view){
+        startActivity( new Intent(this, LoginActivity.class));
     }
 
-    public void abrirTelaCadastro(View view) {
-        startActivity(new Intent(this, CadastroActivity.class));
+    public void abrirTelaCadastro(View view){
+        startActivity( new Intent(this, CadastroActivity.class));
     }
 
     @Override
@@ -60,19 +59,21 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        for (int permissaoResultado : grantResults){
-            if(permissaoResultado == PackageManager.PERMISSION_DENIED){
+        for(int permissaoResultado : grantResults){
+            if( permissaoResultado == PackageManager.PERMISSION_DENIED){
                 alertaValidacaoPermissao();
             }
         }
+
     }
 
     private void alertaValidacaoPermissao(){
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Permissões Negadas");
-        builder.setMessage("Para utilizar o app é necessário aceitar as permissões!");
+        builder.setMessage("Para utilizar o app é necessário aceitar as permissões");
         builder.setCancelable(false);
-        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener(){
+        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 finish();
@@ -81,5 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+
     }
 }
