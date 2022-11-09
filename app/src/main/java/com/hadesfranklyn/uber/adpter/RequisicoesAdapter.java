@@ -2,7 +2,6 @@ package com.hadesfranklyn.uber.adpter;
 
 
 import android.content.Context;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.hadesfranklyn.uber.R;
+import com.hadesfranklyn.uber.helper.Local;
 import com.hadesfranklyn.uber.model.Requisicao;
 import com.hadesfranklyn.uber.model.Usuario;
 
@@ -44,7 +45,24 @@ public class RequisicoesAdapter extends RecyclerView.Adapter<RequisicoesAdapter.
         Usuario passageiro = requisicao.getPassageiro();
 
         holder.nome.setText(passageiro.getNome());
-        holder.distancia.setText("1 km - aproximadamente"); //mudar ainda
+
+        if (motorista != null) {
+            LatLng localPassageiro = new LatLng(
+                    Double.parseDouble(passageiro.getLatitude()),
+                    Double.parseDouble(passageiro.getLongitude())
+            );
+
+            LatLng localMotorista = new LatLng(
+                    Double.parseDouble(motorista.getLatitude()),
+                    Double.parseDouble(motorista.getLongitude())
+            );
+            float distancia = Local.calcularDistancia(localPassageiro, localMotorista);
+            String distanciaFormatada = Local.formatarDistancia(distancia);
+
+            holder.distancia.setText(distanciaFormatada + "- aproximadamente");
+        }
+
+
     }
 
     @Override
