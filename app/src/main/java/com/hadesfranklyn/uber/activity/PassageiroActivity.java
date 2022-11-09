@@ -198,7 +198,7 @@ public class PassageiroActivity extends AppCompatActivity implements OnMapReadyC
         adicionaMarcadorMotorista(localMotorista, motorista.getNome());
 
         // Centralizar passageiro / motorista
-        centralizarDoisMarcadores()
+        centralizarDoisMarcadores(marcadorMotorista,marcadorPassageiro);
     }
 
     private void requisicaoViagem() {

@@ -396,6 +396,12 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
                 //Atualizar GeoFire
                 UsuarioFirebase.atualizarDadosLocalizacao(latitude, longitude);
 
+                // Atualizar localização motorista no Firebase
+                motorista.setLatitude(String.valueOf(latitude));
+                motorista.setLongitude(String.valueOf(longitude));
+                requisicao.setMotorista(motorista);
+                requisicao.atualizarLocalizacaoMotorista();
+
                 alteraInterfaceStatusRequisicao(statusRequisicao);
 
             }
