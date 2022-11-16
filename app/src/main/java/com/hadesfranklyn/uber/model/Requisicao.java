@@ -6,6 +6,7 @@ import com.hadesfranklyn.uber.config.ConfiguracaoFirebase;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class Requisicao {
 
     public static final String STATUS_AGUARDANDO = "aguardando";
@@ -14,6 +15,7 @@ public class Requisicao {
     public static final String STATUS_FINALIZADA = "finalizada";
     public static final String STATUS_ENCERRADA = "encerrada";
     public static final String STATUS_CANCELADA = "cancelada";
+
     private String id;
     private String status;
     private Usuario passageiro;
@@ -69,8 +71,7 @@ public class Requisicao {
     public void atualizarLocalizacaoMotorista(){
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDatabase();
-        DatabaseReference requisicoes = firebaseRef
-                .child("requisicoes");
+        DatabaseReference requisicoes = firebaseRef.child("requisicoes");
 
         DatabaseReference requisicao = requisicoes
                 .child(getId())

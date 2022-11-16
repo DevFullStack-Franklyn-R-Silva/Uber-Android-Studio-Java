@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.hadesfranklyn.uber">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -16,20 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Uber"
         tools:targetApi="31">
-<!--        <activity-->
-<!--            android:name=".activity.CorridaActivity"-->
-<!--            android:exported="false"-->
-<!--            android:label="@string/title_activity_corrida"-->
-<!--            android:theme="@style/Theme.Uber.NoActionBar" />-->
-        <activity
-            android:name=".activity.CorridaActivity"
-            android:label="@string/title_activity_corrida"
-            android:parentActivityName=".activity.RequisicoesActivity"
-            android:theme="@style/Theme.Uber.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hadesfranklyn.uber.activity.RequisicoesActivity" />
-        </activity>
+
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -42,9 +30,18 @@
              "YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
         -->
         <meta-data
-        android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyCVSOCl8xiCHHa0wEeH_vzXOby7TsRR5uI" />
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB8rm2HPt01osWtdQEOfnd8lWCamdBXM7o" />
 
+        <activity
+            android:name=".activity.CorridaActivity"
+            android:label="@string/title_activity_corrida"
+            android:parentActivityName=".activity.RequisicoesActivity"
+            android:theme="@style/Theme.Uber.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hadesfranklyn.uber.activity.RequisicoesActivity" />
+        </activity>
         <activity
             android:name=".activity.PassageiroActivity"
             android:exported="false"
@@ -66,7 +63,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
-            android:label="@string/title_activity" >
+            android:label="@string/title_activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

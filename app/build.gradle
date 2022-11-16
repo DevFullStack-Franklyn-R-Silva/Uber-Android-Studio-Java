@@ -31,6 +31,9 @@ android {
         viewBinding true
     }
     namespace 'com.hadesfranklyn.uber'
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
 }
 
 dependencies {
