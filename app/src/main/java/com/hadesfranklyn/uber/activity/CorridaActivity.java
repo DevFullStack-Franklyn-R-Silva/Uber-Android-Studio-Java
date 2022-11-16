@@ -142,7 +142,20 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
             case Requisicao.STATUS_FINALIZADA:
                 requisicaoFinalizada();
                 break;
+            case Requisicao.STATUS_CANCELADA:
+                requisicaoCancelada();
+                break;
         }
+
+    }
+
+    private void requisicaoCancelada() {
+
+        Toast.makeText(this,
+                "Requisição foi cancelada pelo passageiro!",
+                Toast.LENGTH_SHORT).show();
+
+        startActivity(new Intent(CorridaActivity.this, RequisicoesActivity.class));
 
     }
 
@@ -167,8 +180,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
 
         //Calcular distancia
         float distancia = Local.calcularDistancia(localPassageiro, localDestino);
-        float valorDaCorridaEmReal = 8;
-        float valor = distancia * valorDaCorridaEmReal;
+        float valor = distancia * 8;//4.56
         DecimalFormat decimal = new DecimalFormat("0.00");
         String resultado = decimal.format(valor);
 
@@ -396,7 +408,7 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
                 //Atualizar GeoFire
                 UsuarioFirebase.atualizarDadosLocalizacao(latitude, longitude);
 
-                // Atualizar localização motorista no Firebase
+                //Atualizar localização motorista no Firebase
                 motorista.setLatitude(String.valueOf(latitude));
                 motorista.setLongitude(String.valueOf(longitude));
                 requisicao.setMotorista(motorista);
@@ -513,6 +525,13 @@ public class CorridaActivity extends AppCompatActivity implements OnMapReadyCall
             Intent i = new Intent(CorridaActivity.this, RequisicoesActivity.class);
             startActivity(i);
         }
+
+        //Verificar o status da requisição para encerrar
+        if (statusRequisicao != null && !statusRequisicao.isEmpty()) {
+            requisicao.setStatus(Requisicao.STATUS_ENCERRADA);
+            requisicao.atualizarStatus();
+        }
+
         return false;
     }
 }
